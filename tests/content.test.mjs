@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const [lessonModule, kanaModule] = await Promise.all([
@@ -7,6 +8,12 @@ const [lessonModule, kanaModule] = await Promise.all([
 ]);
 const lessons = lessonModule.LESSONS ?? [];
 const kanaTables = kanaModule.KANA_TABLES ?? {};
+
+test('static entrypoint uses relative asset URLs for GitHub Pages subpaths', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /href="\.\/src\/styles\.css"/);
+  assert.match(html, /src="\.\/src\/app\.js"/);
+});
 
 test('curriculum contains exactly 25 uniquely numbered lessons', () => {
   assert.equal(lessons.length, 25);
