@@ -21,12 +21,35 @@ function makeGrammarMeaningQuestion(id, example, distractors) {
 
 const verbMeanings = new Set([
   'bơi', 'bắt đầu', 'báo cho biết', 'chơi', 'du lịch', 'dọn dẹp', 'giúp đỡ', 'giặt giũ', 'gặp', 'kết thúc', 'lái xe', 'lên xe', 'luyện tập', 'làm việc', 'mang theo', 'mua', 'mua sắm', 'nấu ăn',
-  'nghỉ ngơi', 'quên', 'tiếp tục', 'thức dậy', 'trở về', 'uống', 'xuống xe', 'đi', 'đi dạo', 'đọc sách', 'ăn',
+  'nghỉ ngơi', 'ngủ', 'quên', 'tiếp tục', 'thức dậy', 'trở về', 'uống', 'xuống xe', 'đi', 'đi dạo', 'đọc sách', 'ăn',
   'sự chuẩn bị', 'sự tập trung', 'việc học',
 ]);
 
 const ichidanReadings = new Set(['おきる', 'おりる', 'たべる', 'ねる', 'はじめる', 'みる', 'わすれる']);
-const suruReadings = new Set(['かいもの', 'さんぽ', 'しゅうちゅう', 'そうじ', 'せんたく', 'たんとう', 'べんきょう', 'りょうり', 'りょこう', 'れんしゅう', 'じゅんび']);
+const suruReadings = new Set(['うんてん', 'かいもの', 'さんぽ', 'しゅうちゅう', 'そうじ', 'せんたく', 'たんとう', 'べんきょう', 'りょうり', 'りょこう', 'れんしゅう', 'じゅんび']);
+
+const specialExamples = {
+  'いそがしい': [
+    ['わたしは いそがしいです。', 'Tôi bận rộn.'],
+    ['きょうは とても いそがしいです。', 'Hôm nay tôi rất bận.'],
+  ],
+  'じょうず': [
+    ['わたしは うたが じょうずです。', 'Tôi hát hay.'],
+    ['ともだちは りょうりが じょうずです。', 'Bạn tôi nấu ăn giỏi.'],
+  ],
+  'へた': [
+    ['わたしは うたが へたです。', 'Tôi hát không giỏi.'],
+    ['ともだちは りょうりが へたです。', 'Bạn tôi nấu ăn không giỏi.'],
+  ],
+  'ほしい': [
+    ['あたらしい ほんが ほしいです。', 'Tôi muốn có quyển sách mới.'],
+    ['わたしは あたらしい かばんが ほしいです。', 'Tôi muốn có chiếc cặp mới.'],
+  ],
+  'すき': [
+    ['わたしは えいがが すきです。', 'Tôi thích phim.'],
+    ['ともだちは おんがくが すきです。', 'Bạn tôi thích âm nhạc.'],
+  ],
+};
 
 function masuForm(reading) {
   if (suruReadings.has(reading)) return `${reading}します`;
@@ -38,6 +61,9 @@ function masuForm(reading) {
 }
 
 function makeVocabularyExamples(reading, meaning) {
+  if (specialExamples[reading]) {
+    return specialExamples[reading].map(([jp, vi]) => ({ jp, kana: jp, vi }));
+  }
   if (meaning === 'tôi') {
     return [
       { jp: 'わたしは がくせいです。', kana: 'わたしは がくせいです。', vi: 'Tôi là học sinh.' },
@@ -58,7 +84,7 @@ function makeVocabularyExamples(reading, meaning) {
     ];
   }
 
-  if (['ấm áp', 'bận rộn', 'cao, đắt', 'cũ', 'dễ', 'đau', 'đắt, cao', 'giỏi', 'giống nhau', 'kém', 'khó', 'mát mẻ', 'mới', 'nhỏ', 'rẻ', 'tiện lợi', 'to, lớn', 'yên lặng', 'yên tĩnh'].includes(meaning)) {
+  if (['ấm áp', 'cao, đắt', 'cũ', 'dễ', 'đau', 'đắt, cao', 'giống nhau', 'khó', 'mát mẻ', 'mới', 'nhỏ', 'rẻ', 'tiện lợi', 'to, lớn', 'yên lặng', 'yên tĩnh'].includes(meaning)) {
     return [
       { jp: `この へやは とても ${reading}です。`, kana: `この へやは とても ${reading}です。`, vi: `Căn phòng này rất ${meaning}.` },
       { jp: `あの へやも ${reading}です。`, kana: `あの へやも ${reading}です。`, vi: `Căn phòng kia cũng ${meaning}.` },
