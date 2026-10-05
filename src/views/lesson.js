@@ -2,6 +2,7 @@ import { lessonRoute } from '../lib/routes.js';
 import { lessonQuizKey } from '../lib/lesson-progress.js';
 import { gradeQuiz } from '../lib/quiz.js';
 import { recordScore } from '../lib/progress.js';
+import { getLessonStepNavigation } from '../lib/lesson-navigation.js';
 
 const sections = [
   ['vocabulary', 'Từ mới'],
@@ -65,7 +66,7 @@ export function renderLessonView({ lesson, section: activeSection, progress, onP
       return `<div class="lesson-section-heading"><div><p class="eyebrow">TỪ VỰNG TRỌNG TÂM</p><h2>Từ mới</h2></div><span>${lesson.vocabulary.length} TỪ</span></div>
         <div class="vocabulary-list">${lesson.vocabulary.map((item, index) => {
           const id = `${lesson.id}:${item.kana}`;
-          return `<article class="vocabulary-row ${known.has(id) ? 'is-known' : ''}"><span class="vocabulary-index">${String(index + 1).padStart(2, '0')}</span><div class="vocabulary-main"><strong lang="ja">${escapeHtml(item.jp)}</strong><span class="vocabulary-kana" lang="ja">${escapeHtml(item.kana)}</span><p>${escapeHtml(item.vi)}</p><small lang="ja">${escapeHtml(item.exampleJp)} <i>${escapeHtml(item.exampleVi)}</i></small></div><button class="known-button" data-action="toggle-word" data-word="${escapeHtml(id)}" aria-pressed="${known.has(id)}">${known.has(id) ? 'Đã nhớ ✓' : 'Đánh dấu đã nhớ'}</button></article>`;
+          return `<article class="vocabulary-row ${known.has(id) ? 'is-known' : ''}"><span class="vocabulary-index">${String(index + 1).padStart(2, '0')}</span><div class="vocabulary-main"><strong lang="ja">${escapeHtml(item.jp)}</strong><span class="vocabulary-kana" lang="ja">${escapeHtml(item.kana)}</span><p>${escapeHtml(item.vi)}</p><div class="vocabulary-examples">${item.examples.map((example, exampleIndex) => `<p><span lang="ja">${exampleIndex + 1}. ${escapeHtml(example.jp)}</span><small lang="ja">${escapeHtml(example.kana)}</small><i>${escapeHtml(example.vi)}</i></p>`).join('')}</div></div><button class="known-button" data-action="toggle-word" data-word="${escapeHtml(id)}" aria-pressed="${known.has(id)}">${known.has(id) ? 'Đã nhớ ✓' : 'Đánh dấu đã nhớ'}</button></article>`;
         }).join('')}</div>
         <div class="section-complete-row"><span>${sectionDone('vocabulary') ? 'Bạn đã hoàn thành phần từ mới.' : 'Đánh dấu các từ bạn đã nhớ để ôn lại sau.'}</span><button class="secondary-button" data-action="complete-section" data-section="vocabulary">${sectionDone('vocabulary') ? 'Đã hoàn thành' : 'Hoàn thành phần này'}</button></div>`;
     }
@@ -117,11 +118,19 @@ export function renderLessonView({ lesson, section: activeSection, progress, onP
     const done = new Set(currentProgress.completedSections);
     element.innerHTML = `
       <div class="lesson-breadcrumb"><a href="#/lessons">LỘ TRÌNH N5</a><span>/</span><span>BÀI ${String(lesson.id).padStart(2, '0')}</span></div>
-      <div class="lesson-title-row"><div><p class="eyebrow">BÀI ${String(lesson.id).padStart(2, '0')} · HỌC THEO CHỦ ĐỀ</p><h1>${escapeHtml(lesson.title)}</h1><p class="lesson-subtitle">Mỗi phần học một kỹ năng; tiến độ được lưu trên thiết bị này.</p></div><span class="lesson-title-kanji" lang="ja">${escapeHtml(lesson.reading.jp.slice(0, 2))}</span></div>
+      <div class="lesson-title-row"><div><p class="eyebrow">BÀI ${String(lesson.id).padStart(2, '0')} · ${escapeHtml(lesson.title)}</p><h1 lang="ja">${escapeHtml(lesson.titleJa)}</h1><p class="lesson-title-reading" lang="ja">${escapeHtml(lesson.titleKana)}</p></div></div>
       <nav class="lesson-section-nav" aria-label="Các phần trong bài">${sections.map(([id, label]) => `<a href="${lessonRoute(lesson.id, id)}" class="lesson-section-link ${activeSection === id ? 'is-active' : ''}" ${activeSection === id ? 'aria-current="page"' : ''}><span class="section-status">${done.has(sectionKey(lesson.id, id)) ? '✓' : String(sections.findIndex(([key]) => key === id) + 1).padStart(2, '0')}</span>${label}</a>`).join('')}</nav>
       <div class="lesson-section-content">${renderSection()}</div>
-      <div class="lesson-stepper"><a href="#/lesson/${Math.max(1, lesson.id - 1)}/vocabulary" ${lesson.id === 1 ? 'aria-disabled="true"' : ''}>← BÀI TRƯỚC</a><span>BÀI ${String(lesson.id).padStart(2, '0')} / 25</span><a href="#/lesson/${Math.min(25, lesson.id + 1)}/vocabulary" ${lesson.id === 25 ? 'aria-disabled="true"' : ''}>BÀI TIẾP THEO →</a></div>
+      ${renderStepper()}
     `;
+  }
+
+  function renderStepper() {
+    const { previous, next } = getLessonStepNavigation(lesson.id, activeSection);
+    const link = (step, direction) => step
+      ? `<a class="lesson-step-${direction}" href="${lessonRoute(step.lessonId, step.section)}">${direction === 'previous' ? '← ' : ''}${step.label}${direction === 'next' ? ' →' : ''}</a>`
+      : '<span></span>';
+    return `<div class="lesson-stepper">${link(previous, 'previous')}<span>BÀI ${String(lesson.id).padStart(2, '0')} / 25</span>${link(next, 'next')}</div>`;
   }
 
   element.addEventListener('input', (event) => {
