@@ -65,6 +65,10 @@ test('vocabulary examples conjugate common verb readings correctly', () => {
   assert.equal(findWord(17, '上手').examples[0].jp, 'わたしは うたが じょうずです。');
   assert.equal(findWord(17, '下手').examples[0].jp, 'わたしは うたが へたです。');
   assert.equal(findWord(17, '欲しい').examples[0].jp, 'あたらしい ほんが ほしいです。');
+  assert.equal(findWord(12, '読書').examples[0].jp, 'まいにち どくしょします。');
+  assert.equal(findWord(23, '続ける').examples[0].jp, 'まいにち つづけます。');
+  assert.equal(findWord(24, '知らせる').examples[0].jp, 'まいにち しらせます。');
+  assert.equal(findWord(24, '遅れる').examples[0].jp, 'まいにち おくれます。');
   assert.equal(findWord(1, '私').examples[0].jp, 'わたしは がくせいです。');
 });
 
