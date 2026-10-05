@@ -22,11 +22,11 @@ function makeGrammarMeaningQuestion(id, example, distractors) {
 const verbMeanings = new Set([
   'bơi', 'bắt đầu', 'báo cho biết', 'chơi', 'du lịch', 'dọn dẹp', 'giúp đỡ', 'giặt giũ', 'gặp', 'kết thúc', 'lái xe', 'lên xe', 'luyện tập', 'làm việc', 'mang theo', 'mua', 'mua sắm', 'nấu ăn',
   'nghỉ ngơi', 'ngủ', 'quên', 'tiếp tục', 'thức dậy', 'trở về', 'uống', 'xuống xe', 'đi', 'đi dạo', 'đọc sách', 'ăn',
-  'sự chuẩn bị', 'sự tập trung', 'việc học',
+  'sự chuẩn bị', 'sự tập trung', 'việc học', 'đến muộn',
 ]);
 
-const ichidanReadings = new Set(['おきる', 'おりる', 'たべる', 'ねる', 'はじめる', 'みる', 'わすれる']);
-const suruReadings = new Set(['うんてん', 'かいもの', 'さんぽ', 'しゅうちゅう', 'そうじ', 'せんたく', 'たんとう', 'べんきょう', 'りょうり', 'りょこう', 'れんしゅう', 'じゅんび']);
+const ichidanReadings = new Set(['おきる', 'おりる', 'しらせる', 'たべる', 'つづける', 'ねる', 'はじめる', 'みる', 'わすれる', 'おくれる']);
+const suruReadings = new Set(['うんてん', 'かいもの', 'さんぽ', 'しゅうちゅう', 'そうじ', 'せんたく', 'たんとう', 'べんきょう', 'どくしょ', 'りょうり', 'りょこう', 'れんしゅう', 'じゅんび']);
 
 const specialExamples = {
   'いそがしい': [
@@ -48,6 +48,54 @@ const specialExamples = {
   'すき': [
     ['わたしは えいがが すきです。', 'Tôi thích phim.'],
     ['ともだちは おんがくが すきです。', 'Bạn tôi thích âm nhạc.'],
+  ],
+  'たかい': [
+    ['この くつは たかいです。', 'Đôi giày này đắt.'],
+    ['あの かばんも たかいです。', 'Chiếc cặp kia cũng đắt.'],
+  ],
+  'やすい': [
+    ['この くつは やすいです。', 'Đôi giày này rẻ.'],
+    ['あの かばんも やすいです。', 'Chiếc cặp kia cũng rẻ.'],
+  ],
+  'あたたかい': [
+    ['きょうは あたたかいです。', 'Hôm nay trời ấm.'],
+    ['この おちゃは あたたかいです。', 'Trà này còn ấm.'],
+  ],
+  'すずしい': [
+    ['きょうは すずしいです。', 'Hôm nay trời mát.'],
+    ['この へやは すずしいです。', 'Căn phòng này mát.'],
+  ],
+  'ふるい': [
+    ['この ほんは ふるいです。', 'Quyển sách này cũ.'],
+    ['あの いえも ふるいです。', 'Ngôi nhà kia cũng cũ.'],
+  ],
+  'あたらしい': [
+    ['この ほんは あたらしいです。', 'Quyển sách này mới.'],
+    ['あの かばんも あたらしいです。', 'Chiếc cặp kia cũng mới.'],
+  ],
+  'おおきい': [
+    ['この いえは おおきいです。', 'Ngôi nhà này lớn.'],
+    ['あの へやも おおきいです。', 'Căn phòng kia cũng lớn.'],
+  ],
+  'ちいさい': [
+    ['この いえは ちいさいです。', 'Ngôi nhà này nhỏ.'],
+    ['あの へやも ちいさいです。', 'Căn phòng kia cũng nhỏ.'],
+  ],
+  'いたい': [
+    ['あたまが いたいです。', 'Tôi bị đau đầu.'],
+    ['おなかも いたいです。', 'Tôi cũng bị đau bụng.'],
+  ],
+  'べんり': [
+    ['この でんしゃは べんりです。', 'Tàu điện này tiện lợi.'],
+    ['ちかてつも べんりです。', 'Tàu điện ngầm cũng tiện lợi.'],
+  ],
+  'ひつよう': [
+    ['みずが ひつようです。', 'Tôi cần nước.'],
+    ['この じしょも ひつようです。', 'Tôi cũng cần quyển từ điển này.'],
+  ],
+  'おなじ': [
+    ['この ふたつは おなじです。', 'Hai cái này giống nhau.'],
+    ['わたしたちの かばんは おなじです。', 'Cặp của chúng tôi giống nhau.'],
   ],
 };
 
@@ -84,7 +132,7 @@ function makeVocabularyExamples(reading, meaning) {
     ];
   }
 
-  if (['ấm áp', 'cao, đắt', 'cũ', 'dễ', 'đau', 'đắt, cao', 'giống nhau', 'khó', 'mát mẻ', 'mới', 'nhỏ', 'rẻ', 'tiện lợi', 'to, lớn', 'yên lặng', 'yên tĩnh'].includes(meaning)) {
+  if (['dễ', 'khó', 'yên lặng', 'yên tĩnh'].includes(meaning)) {
     return [
       { jp: `この へやは とても ${reading}です。`, kana: `この へやは とても ${reading}です。`, vi: `Căn phòng này rất ${meaning}.` },
       { jp: `あの へやも ${reading}です。`, kana: `あの へやも ${reading}です。`, vi: `Căn phòng kia cũng ${meaning}.` },
