@@ -19,6 +19,58 @@ function makeGrammarMeaningQuestion(id, example, distractors) {
   };
 }
 
+const verbMeanings = new Set([
+  'bơi', 'bắt đầu', 'báo cho biết', 'chơi', 'du lịch', 'dọn dẹp', 'giúp đỡ', 'giặt giũ', 'gặp', 'kết thúc', 'lái xe', 'lên xe', 'luyện tập', 'làm việc', 'mang theo', 'mua', 'mua sắm', 'nấu ăn',
+  'nghỉ ngơi', 'quên', 'tiếp tục', 'thức dậy', 'trở về', 'uống', 'xuống xe', 'đi', 'đi dạo', 'đọc sách', 'ăn',
+  'sự chuẩn bị', 'sự tập trung', 'việc học',
+]);
+
+const ichidanReadings = new Set(['おきる', 'おりる', 'たべる', 'ねる', 'はじめる', 'みる', 'わすれる']);
+const suruReadings = new Set(['かいもの', 'さんぽ', 'しゅうちゅう', 'そうじ', 'せんたく', 'たんとう', 'べんきょう', 'りょうり', 'りょこう', 'れんしゅう', 'じゅんび']);
+
+function masuForm(reading) {
+  if (suruReadings.has(reading)) return `${reading}します`;
+  if (reading === 'いく') return 'いきます';
+  if (ichidanReadings.has(reading)) return `${reading.slice(0, -1)}ます`;
+  const forms = { う: 'います', く: 'きます', ぐ: 'ぎます', す: 'します', つ: 'ちます', ぬ: 'にます', ぶ: 'びます', む: 'みます', る: 'ります' };
+  const ending = [...reading].at(-1);
+  return `${reading.slice(0, -1)}${forms[ending] ?? `${ending}ます`}`;
+}
+
+function makeVocabularyExamples(reading, meaning) {
+  if (meaning === 'tôi') {
+    return [
+      { jp: 'わたしは がくせいです。', kana: 'わたしは がくせいです。', vi: 'Tôi là học sinh.' },
+      { jp: 'わたしは にほんごを べんきょうします。', kana: 'わたしは にほんごを べんきょうします。', vi: 'Tôi học tiếng Nhật.' },
+    ];
+  }
+  if (meaning === 'tên') {
+    return [
+      { jp: 'なまえを おしえてください。', kana: 'なまえを おしえてください。', vi: 'Xin hãy cho tôi biết tên.' },
+      { jp: 'なまえを かみに かきます。', kana: 'なまえを かみに かきます。', vi: 'Tôi viết tên lên giấy.' },
+    ];
+  }
+  if (verbMeanings.has(meaning)) {
+    const polite = masuForm(reading);
+    return [
+      { jp: `まいにち ${polite}。`, kana: `まいにち ${polite}。`, vi: `Tôi ${meaning} mỗi ngày.` },
+      { jp: `にちようびも ${polite}。`, kana: `にちようびも ${polite}。`, vi: `Chủ nhật tôi cũng ${meaning}.` },
+    ];
+  }
+
+  if (['ấm áp', 'bận rộn', 'cao, đắt', 'cũ', 'dễ', 'đau', 'đắt, cao', 'giỏi', 'giống nhau', 'kém', 'khó', 'mát mẻ', 'mới', 'nhỏ', 'rẻ', 'tiện lợi', 'to, lớn', 'yên lặng', 'yên tĩnh'].includes(meaning)) {
+    return [
+      { jp: `この へやは とても ${reading}です。`, kana: `この へやは とても ${reading}です。`, vi: `Căn phòng này rất ${meaning}.` },
+      { jp: `あの へやも ${reading}です。`, kana: `あの へやも ${reading}です。`, vi: `Căn phòng kia cũng ${meaning}.` },
+    ];
+  }
+
+  return [
+    { jp: `わたしは ${reading}が すきです。`, kana: `わたしは ${reading}が すきです。`, vi: `Tôi thích ${meaning}.` },
+    { jp: `きょう、${reading}について はなします。`, kana: `きょう、${reading}について はなします。`, vi: `Hôm nay tôi nói về ${meaning}.` },
+  ];
+}
+
 function makeLesson(seed) {
   const [id, title, words, grammarSeeds, readingSeed, writing] = seed;
   const allWords = [...words, ...additionalWords[id]];
@@ -26,10 +78,7 @@ function makeLesson(seed) {
     jp,
     kana,
     vi,
-    examples: [
-      { jp: `日本語で「${kana}」と言います。`, kana: `にほんごで「${kana}」といいます。`, vi: `Tiếng Nhật dùng từ “${jp}”, nghĩa là ${vi}.` },
-      { jp: `「${kana}」を使って文を作ります。`, kana: `「${kana}」をつかってぶんをつくります。`, vi: `Tôi đặt câu có dùng từ “${jp}” (${vi}).` },
-    ],
+    examples: makeVocabularyExamples(kana, vi),
   }));
   const grammar = grammarSeeds.map(([pattern, explanation, jp, kana, vi]) => ({
     pattern,
