@@ -21,12 +21,15 @@ function makeGrammarMeaningQuestion(id, example, distractors) {
 
 function makeLesson(seed) {
   const [id, title, words, grammarSeeds, readingSeed, writing] = seed;
-  const vocabulary = words.map(([jp, kana, vi]) => ({
+  const allWords = [...words, ...additionalWords[id]];
+  const vocabulary = allWords.map(([jp, kana, vi]) => ({
     jp,
     kana,
     vi,
-    exampleJp: `この「${kana}」ということばを覚えます。`,
-    exampleVi: `Mình ghi nhớ từ “${jp}”, nghĩa là ${vi}.`,
+    examples: [
+      { jp: `日本語で「${kana}」と言います。`, kana: `にほんごで「${kana}」といいます。`, vi: `Tiếng Nhật dùng từ “${jp}”, nghĩa là ${vi}.` },
+      { jp: `「${kana}」を使って文を作ります。`, kana: `「${kana}」をつかってぶんをつくります。`, vi: `Tôi đặt câu có dùng từ “${jp}” (${vi}).` },
+    ],
   }));
   const grammar = grammarSeeds.map(([pattern, explanation, jp, kana, vi]) => ({
     pattern,
@@ -45,7 +48,7 @@ function makeLesson(seed) {
   const vocabOptionsA = makeOptions(words.slice(0, 4).map((word) => word[2]), `l${id}-vocab-a`);
   const vocabOptionsB = makeOptions(words.slice(4, 8).map((word) => word[2]), `l${id}-vocab-b`);
   const grammarDistractors = [
-    ...words.map(([, , meaning]) => meaning),
+    ...allWords.map(([, , meaning]) => meaning),
     ...reading.questions.flatMap((question) => question.options.map((option) => option.text)),
     ...grammar.flatMap((point) => point.examples.map((example) => example.vi)),
   ];
@@ -56,7 +59,8 @@ function makeLesson(seed) {
     makeGrammarMeaningQuestion(`l${id}-quiz-g1`, grammar[0].examples[0], grammarDistractors),
     makeGrammarMeaningQuestion(`l${id}-quiz-g2`, grammar[1].examples[0], grammarDistractors),
   ];
-  return { id, title, vocabulary, grammar, reading, writing, quiz };
+  const [titleJa, titleKana] = lessonTitles[id - 1];
+  return { id, title, titleJa, titleKana, vocabulary, grammar, reading, writing, quiz };
 }
 
 const seeds = [
@@ -311,5 +315,45 @@ const seeds = [
     ['Người nói làm phần nào tốt?', ['Ngữ pháp', 'Đọc hiểu', 'Viết'], 1, 'どっかいはよくできました nghĩa là làm tốt phần đọc hiểu.']],
     { prompt: 'Viết kế hoạch ôn tập N5 cho một tuần, gồm từ vựng, ngữ pháp và đọc.', hints: ['まいにち___をふくしゅうします。', '___でべんきょうします。', 'しけんにごうかくしたいです。'], sample: 'まいにちたんごとぶんぽうをふくしゅうします。よるにどっかいをれんしゅうします。しけんにごうかくしたいです。' }],
 ];
+
+const lessonTitles = [
+  ['自己紹介', 'じこしょうかい'], ['国・仕事・言葉', 'くに・しごと・ことば'], ['教室の物', 'きょうしつのもの'],
+  ['数字・年齢・電話番号', 'すうじ・ねんれい・でんわばんごう'], ['時間と毎日の予定', 'じかんとまいにちのよてい'], ['場所と道案内', 'ばしょとみちあんない'],
+  ['家族と人', 'かぞくとひと'], ['食べ物と飲み物', 'たべものとのみもの'], ['買い物と値段', 'かいものとねだん'],
+  ['毎日の生活', 'まいにちのせいかつ'], ['学校と仕事', 'がっこうとしごと'], ['趣味と活動', 'しゅみとかつどう'],
+  ['天気と季節', 'てんきときせつ'], ['乗り物と移動', 'のりものといどう'], ['家と物の場所', 'いえともののばしょ'],
+  ['形容詞', 'けいようし'], ['能力と希望', 'のうりょくときぼう'], ['誘いと約束', 'さそいとやくそく'],
+  ['健康と体', 'けんこうとからだ'], ['過去と経験', 'かことけいけん'], ['規則・依頼・指示', 'きそく・いらい・しじ'],
+  ['比較と選択', 'ひかくとせんたく'], ['計画と予定', 'けいかくとよてい'], ['会話のまとめ', 'かいわのまとめ'],
+  ['N5総復習', 'エヌごそうふくしゅう'],
+];
+
+const additionalWords = {
+  1: [['人', 'ひと', 'người'], ['国籍', 'こくせき', 'quốc tịch'], ['会社', 'かいしゃ', 'công ty'], ['大学', 'だいがく', 'đại học'], ['仕事', 'しごと', 'công việc'], ['言語', 'げんご', 'ngôn ngữ'], ['出身', 'しゅっしん', 'quê quán']],
+  2: [['国籍', 'こくせき', 'quốc tịch'], ['出身', 'しゅっしん', 'quê quán'], ['大学', 'だいがく', 'đại học'], ['病院', 'びょういん', 'bệnh viện'], ['教師', 'きょうし', 'giáo viên'], ['学生', 'がくせい', 'học sinh'], ['会社', 'かいしゃ', 'công ty']],
+  3: [['教科書', 'きょうかしょ', 'sách giáo khoa'], ['黒板', 'こくばん', 'bảng đen'], ['机の上', 'つくえのうえ', 'trên bàn'], ['消しゴム', 'けしごむ', 'cục tẩy'], ['万年筆', 'まんねんひつ', 'bút máy'], ['教科', 'きょうか', 'môn học'], ['窓', 'まど', 'cửa sổ']],
+  4: [['一', 'いち', 'một'], ['二', 'に', 'hai'], ['三', 'さん', 'ba'], ['四', 'よん', 'bốn'], ['五', 'ご', 'năm'], ['半', 'はん', 'rưỡi'], ['月', 'がつ', 'tháng']],
+  5: [['午前', 'ごぜん', 'buổi sáng'], ['午後', 'ごご', 'buổi chiều'], ['毎朝', 'まいあさ', 'mỗi sáng'], ['毎晩', 'まいばん', 'mỗi tối'], ['休み', 'やすみ', 'ngày nghỉ'], ['月曜日', 'げつようび', 'thứ Hai'], ['週末', 'しゅうまつ', 'cuối tuần']],
+  6: [['前', 'まえ', 'phía trước'], ['後ろ', 'うしろ', 'phía sau'], ['隣', 'となり', 'bên cạnh'], ['近く', 'ちかく', 'gần'], ['交差点', 'こうさてん', 'ngã tư'], ['道', 'みち', 'con đường'], ['建物', 'たてもの', 'tòa nhà']],
+  7: [['祖父', 'そふ', 'ông mình'], ['祖母', 'そぼ', 'bà mình'], ['姉妹', 'しまい', 'chị em gái'], ['兄弟', 'きょうだい', 'anh chị em'], ['両親', 'りょうしん', 'bố mẹ'], ['子ども', 'こども', 'trẻ em'], ['家', 'いえ', 'nhà']],
+  8: [['卵', 'たまご', 'trứng'], ['牛乳', 'ぎゅうにゅう', 'sữa'], ['果物', 'くだもの', 'trái cây'], ['りんご', 'りんご', 'táo'], ['朝ご飯', 'あさごはん', 'bữa sáng'], ['昼ご飯', 'ひるごはん', 'bữa trưa'], ['晩ご飯', 'ばんごはん', 'bữa tối']],
+  9: [['店員', 'てんいん', 'nhân viên cửa hàng'], ['高い', 'たかい', 'đắt, cao'], ['安い', 'やすい', 'rẻ'], ['売る', 'うる', 'bán'], ['買う', 'かう', 'mua'], ['お金', 'おかね', 'tiền'], ['品物', 'しなもの', 'món hàng']],
+  10: [['働く', 'はたらく', 'làm việc'], ['休む', 'やすむ', 'nghỉ ngơi'], ['帰宅', 'きたく', 'về nhà'], ['朝食', 'ちょうしょく', 'bữa sáng'], ['夕食', 'ゆうしょく', 'bữa tối'], ['シャワー', 'しゃわー', 'vòi sen'], ['毎晩', 'まいばん', 'mỗi tối']],
+  11: [['音楽', 'おんがく', 'âm nhạc'], ['映画', 'えいが', 'phim'], ['写真', 'しゃしん', 'ảnh'], ['本を読む', 'ほんをよむ', 'đọc sách'], ['歌', 'うた', 'bài hát'], ['スポーツ', 'すぽーつ', 'thể thao'], ['旅行', 'りょこう', 'du lịch']],
+  12: [['予定', 'よてい', 'dự định'], ['公園', 'こうえん', 'công viên'], ['散歩', 'さんぽ', 'đi dạo'], ['映画館', 'えいがかん', 'rạp phim'], ['遊ぶ', 'あそぶ', 'chơi'], ['友人', 'ゆうじん', 'bạn bè'], ['来週', 'らいしゅう', 'tuần sau']],
+  13: [['暖かい', 'あたたかい', 'ấm áp'], ['涼しい', 'すずしい', 'mát mẻ'], ['風', 'かぜ', 'gió'], ['台風', 'たいふう', 'bão'], ['雲', 'くも', 'mây'], ['気温', 'きおん', 'nhiệt độ'], ['天気予報', 'てんきよほう', 'dự báo thời tiết']],
+  14: [['新幹線', 'しんかんせん', 'tàu shinkansen'], ['乗る', 'のる', 'lên xe'], ['降りる', 'おりる', 'xuống xe'], ['乗り換え', 'のりかえ', 'chuyển tàu'], ['片道', 'かたみち', 'vé một chiều'], ['往復', 'おうふく', 'khứ hồi'], ['運転手', 'うんてんしゅ', 'tài xế']],
+  15: [['宿題', 'しゅくだい', 'bài tập về nhà'], ['試験', 'しけん', 'kỳ thi'], ['教室', 'きょうしつ', 'phòng học'], ['図書館', 'としょかん', 'thư viện'], ['質問', 'しつもん', 'câu hỏi'], ['答え', 'こたえ', 'câu trả lời'], ['練習', 'れんしゅう', 'luyện tập']],
+  16: [['頭', 'あたま', 'đầu'], ['手', 'て', 'tay'], ['足', 'あし', 'chân'], ['目', 'め', 'mắt'], ['痛い', 'いたい', 'đau'], ['熱', 'ねつ', 'sốt'], ['薬', 'くすり', 'thuốc']],
+  17: [['昼休み', 'ひるやすみ', 'giờ nghỉ trưa'], ['朝ご飯', 'あさごはん', 'bữa sáng'], ['夕方', 'ゆうがた', 'chiều tối'], ['夜中', 'よなか', 'nửa đêm'], ['起きる', 'おきる', 'thức dậy'], ['寝る', 'ねる', 'ngủ'], ['忙しい', 'いそがしい', 'bận rộn']],
+  18: [['入口', 'いりぐち', 'lối vào'], ['出口', 'でぐち', 'lối ra'], ['角', 'かど', 'góc đường'], ['信号', 'しんごう', 'đèn giao thông'], ['橋', 'はし', 'cây cầu'], ['公園', 'こうえん', 'công viên'], ['近所', 'きんじょ', 'khu phố']],
+  19: [['空港', 'くうこう', 'sân bay'], ['飛行機', 'ひこうき', 'máy bay'], ['ホテル', 'ほてる', 'khách sạn'], ['地図', 'ちず', 'bản đồ'], ['写真', 'しゃしん', 'ảnh'], ['お土産', 'おみやげ', 'quà lưu niệm'], ['旅行者', 'りょこうしゃ', 'du khách']],
+  20: [['会議', 'かいぎ', 'cuộc họp'], ['資料', 'しりょう', 'tài liệu'], ['始める', 'はじめる', 'bắt đầu'], ['終わる', 'おわる', 'kết thúc'], ['同僚', 'どうりょう', 'đồng nghiệp'], ['忙しい', 'いそがしい', 'bận rộn'], ['予定表', 'よていひょう', 'thời gian biểu']],
+  21: [['必要', 'ひつよう', 'cần thiết'], ['傘', 'かさ', 'ô, dù'], ['鍵', 'かぎ', 'chìa khóa'], ['財布', 'さいふ', 'ví tiền'], ['地図', 'ちず', 'bản đồ'], ['持つ', 'もつ', 'mang theo'], ['忘れる', 'わすれる', 'quên']],
+  22: [['毎週', 'まいしゅう', 'mỗi tuần'], ['習慣', 'しゅうかん', 'thói quen'], ['掃除', 'そうじ', 'dọn dẹp'], ['洗濯', 'せんたく', 'giặt giũ'], ['料理', 'りょうり', 'nấu ăn'], ['手伝う', 'てつだう', 'giúp đỡ'], ['家事', 'かじ', 'việc nhà']],
+  23: [['将来', 'しょうらい', 'tương lai'], ['明後日', 'あさって', 'ngày kia'], ['再来週', 'さらいしゅう', 'tuần sau nữa'], ['毎年', 'まいとし', 'mỗi năm'], ['続ける', 'つづける', 'tiếp tục'], ['目標', 'もくひょう', 'mục tiêu'], ['夢', 'ゆめ', 'ước mơ']],
+  24: [['会う', 'あう', 'gặp'], ['遅れる', 'おくれる', 'đến muộn'], ['場所', 'ばしょ', 'địa điểm'], ['知らせる', 'しらせる', 'báo cho biết'], ['都合', 'つごう', 'sự thuận tiện'], ['返事', 'へんじ', 'câu trả lời'], ['メッセージ', 'めっせーじ', 'tin nhắn']],
+  25: [['正解', 'せいかい', 'đáp án đúng'], ['結果', 'けっか', 'kết quả'], ['漢字', 'かんじ', 'chữ Hán'], ['聴解', 'ちょうかい', 'nghe hiểu'], ['問題', 'もんだい', 'câu hỏi, vấn đề'], ['努力', 'どりょく', 'nỗ lực'], ['集中', 'しゅうちゅう', 'sự tập trung']],
+};
 
 export const LESSONS = seeds.map(makeLesson);
