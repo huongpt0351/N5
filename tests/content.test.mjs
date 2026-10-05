@@ -40,6 +40,29 @@ test('each lesson meets the minimum learning content and has answer keys', () =>
   }
 });
 
+test('vocabulary examples show contextual use instead of repeated definition prompts', () => {
+  const genericExamples = [
+    /^日本語で「.+」と言います。$/,
+    /^「.+」を使って文を作ります。$/,
+  ];
+  for (const lesson of lessons) {
+    for (const word of lesson.vocabulary) {
+      assert.equal(word.examples.length, 2);
+      assert.notEqual(word.examples[0].jp, word.examples[1].jp);
+      assert.ok(word.examples.every((example) => genericExamples.every((pattern) => !pattern.test(example.jp))));
+      assert.ok(word.examples.every((example) => !example.vi.startsWith('Tiếng Nhật dùng từ')));
+    }
+  }
+});
+
+test('vocabulary examples conjugate common verb readings correctly', () => {
+  const findWord = (lessonId, japanese) => lessons[lessonId - 1].vocabulary.find((word) => word.jp === japanese);
+  assert.equal(findWord(10, '起きる').examples[0].jp, 'まいにち おきます。');
+  assert.equal(findWord(10, '飲む').examples[0].jp, 'まいにち のみます。');
+  assert.equal(findWord(17, '料理').examples[0].jp, 'まいにち りょうりします。');
+  assert.equal(findWord(1, '私').examples[0].jp, 'わたしは がくせいです。');
+});
+
 test('comprehensive exercises do not repeat generic grammar recall questions', () => {
   for (const lesson of lessons) {
     const grammarQuestions = lesson.quiz.filter((question) => question.id.endsWith('-g1') || question.id.endsWith('-g2'));
