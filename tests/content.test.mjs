@@ -24,9 +24,11 @@ test('each lesson meets the minimum learning content and has answer keys', () =>
   assert.equal(lessons.length, 25);
   for (const lesson of lessons) {
     assert.ok(lesson.title, `lesson ${lesson.id} needs a title`);
-    assert.ok(lesson.vocabulary.length >= 8, `lesson ${lesson.id} needs 8 vocabulary items`);
-    assert.ok(lesson.vocabulary.every((item) => item.jp && item.kana && item.vi && item.exampleJp && item.exampleVi));
-    assert.ok(lesson.vocabulary.every((item) => item.exampleJp.includes(item.kana) && item.exampleVi.includes(item.jp) && item.exampleVi.includes(item.vi)));
+    assert.ok(lesson.titleJa && lesson.titleKana, `lesson ${lesson.id} needs Japanese title and reading`);
+    assert.equal(lesson.vocabulary.length, 15, `lesson ${lesson.id} needs 15 vocabulary items`);
+    assert.equal(new Set(lesson.vocabulary.map((item) => item.jp)).size, 15, `lesson ${lesson.id} must not repeat vocabulary`);
+    assert.ok(lesson.vocabulary.every((item) => item.jp && item.kana && item.vi && item.examples.length === 2));
+    assert.ok(lesson.vocabulary.every((item) => item.examples.every((example) => example.jp && example.kana && example.vi)));
     assert.ok(lesson.grammar.length >= 2, `lesson ${lesson.id} needs 2 grammar points`);
     assert.ok(lesson.grammar.every((item) => item.pattern && item.explanation && item.examples.length));
     assert.ok(lesson.reading.jp && lesson.reading.kana && lesson.reading.vi);
